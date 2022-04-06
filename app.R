@@ -5,7 +5,7 @@
 #install.packages("plyr")
 #install.packages("chromoMap")
 
-
+library(rsconnect)
 library(shiny)
 library(palmerpenguins)
 library(shinythemes)
@@ -21,8 +21,7 @@ library(plotly)
 library(plyr)
 library(DT)
 
-lupus_cat <- read.csv("/Users/gonzalac/OneDrive - KAUST/gwas_lupus_filtrado.csv")
-lupus_cat ##1071
+lupus_cat <- read.csv("./gwas_lupus_filtrado.csv")
 ##Filtramos for p values
 lupus_cat <- lupus_cat[lupus_cat$P.VALUE < 1e-6,]
 lupus_cat  ##828
@@ -65,22 +64,22 @@ Australia	11", header=T)
 
 
 age <- c("<18" ,  "19-29" ,  "30-39" ,  "40-49" ,  ">50" )
-white <- c(44 ,  52 ,  37 ,  19 ,  37)
-african <- c(18 ,  35 ,  32 ,  24 ,  26)
-asian <- c(49 , 76, 50, 38, 52)
-hispanic <- c(17, 39, 18, 21, 14)
+NonHispanicWhite <- c(44 ,  52 ,  37 ,  19 ,  37)
+NonHispanicAfricanAmerican <- c(18 ,  35 ,  32 ,  24 ,  26)
+Asian <- c(49 , 76, 50, 38, 52)
+Hispanic <- c(17, 39, 18, 21, 14)
 
-df_age <- data.frame(age, white, african, asian, hispanic)
+df_age <- data.frame(age, NonHispanicWhite, NonHispanicAfricanAmerican, Asian, Hispanic)
 df_age$age <- factor(df_age$age, levels = c("<18" ,  "19-29" ,  "30-39" ,  "40-49" ,  ">50"))
 
 
 sex <- c("male" ,  "female" )
-white <- c(17, 172)
-african <- c(13, 122)
-asian <- c(32, 233)
-hispanic <- c(12, 97)
+NonHispanicWhite <- c(17, 172)
+NonHispanicAfricanAmerican <- c(13, 122)
+Asian <- c(32, 233)
+Hispanic <- c(12, 97)
 
-df_sex <- data.frame(sex, white, african, asian, hispanic)
+df_sex <- data.frame(sex, NonHispanicWhite, NonHispanicAfricanAmerican, Asian, Hispanic)
 
 
 
@@ -109,7 +108,7 @@ ui <- fluidPage(theme = bslib::bs_theme(bootswatch = "minty"),
              Although lupus can develop in people with no family history of lupus, there are likely to be other
              autoimmune diseases in some family members."),
                            actionButton('go_genomic_tab', 'More information about Lupus Genomics', 
-                                        style="color: #fff; background-color: #cabdd6; border-color: white"),
+                                        style="color: #fff; background-color: #cabdd6; border-color: white", icon = icon("dna")),
                            
                            br(),
                            br(),
@@ -119,12 +118,16 @@ ui <- fluidPage(theme = bslib::bs_theme(bootswatch = "minty"),
              Lupus strikes mostly women of childbearing age. However, men, children, and teenagers develop lupus, too. 
                Most people with lupus develop the disease between the ages of 15-44."),
                            actionButton('go_demographics_tab', 'More information about Demographics ',
-                                        style="color: #fff; background-color: #cabdd6; border-color: white"),
+                                        style="color: #fff; background-color: #cabdd6; border-color: white", icon = icon("user")),
                            actionButton('go_map_tab', 'More information about Global incidence ',
-                                        style="color: #fff; background-color: #cabdd6; border-color: white"),
+                                        style="color: #fff; background-color: #cabdd6; border-color: white", icon = icon("globe")),
                            br(),
                            br(),
                            br(),
+                           
+                           actionButton(inputId='ab1', label="Code", style="color: #fff; background-color: gray; border-color: white",
+                                               icon = icon("code"), 
+                                               onclick ="window.open('https://github.com/anagonzalezalvarez/STAT294_P2_SHINY/blob/main/app.R')")
                            
                            
                   ),
@@ -162,7 +165,7 @@ ui <- fluidPage(theme = bslib::bs_theme(bootswatch = "minty"),
                                           selectInput(
                                             inputId = "GroupRace",
                                             label = "Select ethnicity",
-                                            choices = c("white",	"african",	"asian",	"hispanic"), selected = "hispanic"),
+                                            choices = c("NonHispanicWhite", "NonHispanicAfricanAmerican", "Asian", "Hispanic"), selected = "Hispanic"),
                                           p("Characteristics of prevalent cases of Sistematic Lupus Erythematosus in San Francisco County, 2007 – 2009."),
                                           
                                           p("Data obtained from:"),
